@@ -3,7 +3,7 @@ import random
 import string
 import sys
 from contextlib import contextmanager
-from typing import Any, Dict, Generator, Iterator, List, Optional, Sequence, TextIO, TypedDict
+from typing import Any, Dict, Generator, Iterator, List, Mapping, Optional, TextIO, TypedDict
 
 import boto3
 import dagster._check as check
@@ -31,7 +31,7 @@ class PipesS3MessageReader(PipesBlobStoreMessageReader):
         interval (float): interval in seconds between attempts to download a chunk
         bucket (str): The S3 bucket to read from.
         client (WorkspaceClient): A boto3 client.
-        log_readers (Optional[Sequence[PipesLogReader]]): A set of readers for logs on S3.
+        log_readers (Optional[Mapping[str, PipesLogReader]]): A mapping of arbitrary strings to log readers for logs on S3.
     """
 
     def __init__(
@@ -40,7 +40,7 @@ class PipesS3MessageReader(PipesBlobStoreMessageReader):
         interval: float = 10,
         bucket: str,
         client: boto3.client,  # pyright: ignore (reportGeneralTypeIssues)
-        log_readers: Optional[Sequence[PipesLogReader]] = None,
+        log_readers: Optional[Mapping[str, PipesLogReader]] = None,
     ):
         super().__init__(
             interval=interval,

@@ -333,14 +333,14 @@ def databricks_asset(context: AssetExecutionContext):
             # location every 5 minutes. Dagster will poll this location and forward the
             # stdout/stderr logs every time they are updated to the orchestration process
             # stdout/stderr.
-            log_readers=[
-                PipesDbfsLogReader(
+            log_readers={
+                "stdout": PipesDbfsLogReader(
                     client=client, remote_log_name="stdout", target_stream=sys.stdout
                 ),
-                PipesDbfsLogReader(
+                "stderr": PipesDbfsLogReader(
                     client=client, remote_log_name="stderr", target_stream=sys.stderr
                 ),
-            ],
+            },
         ),
     ) as pipes_session:
         ##### Option (1)

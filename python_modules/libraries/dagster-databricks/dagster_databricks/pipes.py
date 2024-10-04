@@ -6,7 +6,7 @@ import string
 import sys
 import time
 from contextlib import ExitStack, contextmanager
-from typing import Any, Dict, Iterator, Literal, Mapping, Optional, Sequence, Set, TextIO
+from typing import Any, Dict, Iterator, Literal, Mapping, Optional, Set, TextIO
 
 import dagster._check as check
 from dagster._core.definitions.resource_annotation import TreatAsResourceParam
@@ -102,18 +102,18 @@ class PipesDatabricksClient(PipesClient, TreatAsResourceParam):
         )
 
         if logging_configured:
-            log_readers = [
-                PipesDbfsLogReader(
+            log_readers = {
+                "stdout": PipesDbfsLogReader(
                     client=self.client,
                     remote_log_name="stdout",
                     target_stream=sys.stdout,
                 ),
-                PipesDbfsLogReader(
+                "stderr": PipesDbfsLogReader(
                     client=self.client,
                     remote_log_name="stderr",
                     target_stream=sys.stderr,
                 ),
-            ]
+            }
         else:
             log_readers = None
         return PipesDbfsMessageReader(
@@ -333,7 +333,7 @@ class PipesDbfsMessageReader(PipesBlobStoreMessageReader):
         client (WorkspaceClient): A databricks `WorkspaceClient` object.
         cluster_log_root (Optional[str]): The root path on DBFS where the cluster logs are written.
             If set, this will be used to read stderr/stdout logs.
-        log_readers (Optional[Sequence[PipesLogReader]]): A set of readers for logs on DBFS.
+        log_readers (Optional[Mapping[str, PipesLogReader]]): A mapping of arbitrary strings to log readers for logs on DBFS.
     """
 
     def __init__(
@@ -341,7 +341,7 @@ class PipesDbfsMessageReader(PipesBlobStoreMessageReader):
         *,
         interval: float = 10,
         client: WorkspaceClient,
-        log_readers: Optional[Sequence[PipesLogReader]] = None,
+        log_readers: Optional[Mapping[str, PipesLogReader]] = None,
     ):
         super().__init__(
             interval=interval,
@@ -409,6 +409,9 @@ class PipesDbfsLogReader(PipesChunkedLogReader):
         self.log_modification_time = None
         self.log_path = None
 
+    def target_is_readable(self, params: PipesParams) -> bool:
+        return self._get_log_path(params) is not None
+
     def download_log_chunk(self, params: PipesParams) -> Optional[str]:
         log_path = self._get_log_path(params)
         if log_path is None:
@@ -427,9 +430,6 @@ class PipesDbfsLogReader(PipesChunkedLogReader):
                 return chunk
             except IOError:
                 return None
-
-    def target_is_readable(self, params: PipesParams) -> bool:
-        return self._get_log_path(params) is not None
 
     @property
     def name(self) -> str:
