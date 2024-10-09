@@ -1111,6 +1111,13 @@ export type DefinitionTag = {
   value: Scalars['String']['output'];
 };
 
+export type DeleteBackfillResult = DeleteBackfillSuccess | PythonError | UnauthorizedError;
+
+export type DeleteBackfillSuccess = {
+  __typename: 'DeleteBackfillSuccess';
+  backfillId: Scalars['String']['output'];
+};
+
 export type DeleteDynamicPartitionsResult =
   | DeleteDynamicPartitionsSuccess
   | PythonError
@@ -2612,6 +2619,7 @@ export type Mutation = {
   cancelPartitionBackfill: CancelBackfillResult;
   deleteConcurrencyLimit: Scalars['Boolean']['output'];
   deleteDynamicPartitions: DeleteDynamicPartitionsResult;
+  deletePartitionBackfill: DeleteBackfillResult;
   deletePipelineRun: DeletePipelineRunResult;
   deleteRun: DeletePipelineRunResult;
   freeConcurrencySlots: Scalars['Boolean']['output'];
@@ -2664,6 +2672,10 @@ export type MutationDeleteDynamicPartitionsArgs = {
   partitionKeys: Array<Scalars['String']['input']>;
   partitionsDefName: Scalars['String']['input'];
   repositorySelector: RepositorySelector;
+};
+
+export type MutationDeletePartitionBackfillArgs = {
+  backfillId: Scalars['String']['input'];
 };
 
 export type MutationDeletePipelineRunArgs = {
@@ -7586,6 +7598,19 @@ export const buildDefinitionTag = (
   };
 };
 
+export const buildDeleteBackfillSuccess = (
+  overrides?: Partial<DeleteBackfillSuccess>,
+  _relationshipsToOmit: Set<string> = new Set(),
+): {__typename: 'DeleteBackfillSuccess'} & DeleteBackfillSuccess => {
+  const relationshipsToOmit: Set<string> = new Set(_relationshipsToOmit);
+  relationshipsToOmit.add('DeleteBackfillSuccess');
+  return {
+    __typename: 'DeleteBackfillSuccess',
+    backfillId:
+      overrides && overrides.hasOwnProperty('backfillId') ? overrides.backfillId! : 'totam',
+  };
+};
+
 export const buildDeleteDynamicPartitionsSuccess = (
   overrides?: Partial<DeleteDynamicPartitionsSuccess>,
   _relationshipsToOmit: Set<string> = new Set(),
@@ -10170,6 +10195,12 @@ export const buildMutation = (
         : relationshipsToOmit.has('DeleteDynamicPartitionsSuccess')
         ? ({} as DeleteDynamicPartitionsSuccess)
         : buildDeleteDynamicPartitionsSuccess({}, relationshipsToOmit),
+    deletePartitionBackfill:
+      overrides && overrides.hasOwnProperty('deletePartitionBackfill')
+        ? overrides.deletePartitionBackfill!
+        : relationshipsToOmit.has('DeleteBackfillSuccess')
+        ? ({} as DeleteBackfillSuccess)
+        : buildDeleteBackfillSuccess({}, relationshipsToOmit),
     deletePipelineRun:
       overrides && overrides.hasOwnProperty('deletePipelineRun')
         ? overrides.deletePipelineRun!
