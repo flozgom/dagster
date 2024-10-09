@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from typing import Dict
 
@@ -49,6 +50,9 @@ setup(
         "Operating System :: OS Independent",
     ],
     packages=find_packages(exclude=["dagster_airlift_tests*", "examples*"]),
+    requires=["setuptools"]
+    if sys.version_info >= (3, 12)
+    else [],  # python 3.12+ removes setuptools from standard library, so we need to install it directly.
     extras_require={
         "core": [
             f"dagster{pin}",
